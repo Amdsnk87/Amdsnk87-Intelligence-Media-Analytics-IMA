@@ -4,13 +4,20 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
+from urllib.parse import quote_plus
 
-# Database connection
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Get the full PostgreSQL URL from the environment
+DATABASE_URL = os.getenv("PGDATABASE_URL") or os.getenv("DATABASE_URL")
 
 # Fix for Railway's PostgreSQL - Railway uses 'postgres://' but SQLAlchemy requires 'postgresql://'
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://")
+if DATABASE_URL and not DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = "postgresql://" + DATABASE_URL
+
+# Create SQLAlchemy engine
+engine = create_engine(DATABASE_URL, echo=True)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 
 # Handle database connection with better error reporting
 try:
