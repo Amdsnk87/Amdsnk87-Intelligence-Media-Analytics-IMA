@@ -9,15 +9,29 @@ from urllib.parse import quote_plus
 # Get the full PostgreSQL URL from the environment
 DATABASE_URL = os.getenv("PGDATABASE_URL") or os.getenv("DATABASE_URL")
 
+if not DATABASE_URL:
+    raise ValueError("Missing DATABASE_URL or PGDATABASE_URL environment variable")
+
+# Replace old scheme if needed
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# DEBUG: Print the URL (remove password before printing)
+from urllib.parse import urlparse
+
+parsed = urlparse(DATABASE_URL)
+safe_url = f"{parsed.scheme}://{parsed.username}:***@{parsed.hostname}:{parsed.port}/{parsed.path.lstrip('/')}"
+print("Connecting to DB:", safe_url)
+
+# Now create engine
+engine = create_engine(DATABASE_URL, echo=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
 # Fix for Railway's PostgreSQL - Railway uses 'postgres://' but SQLAlchemy requires 'postgresql://'
 if DATABASE_URL and not DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = "postgresql://" + DATABASE_URL
 
-# Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL, echo=True)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
 # Handle database connection with better error reporting
 try:
