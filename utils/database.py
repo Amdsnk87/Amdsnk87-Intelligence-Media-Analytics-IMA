@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 import json
 
 # Get and validate PostgreSQL URL
-DATABASE_URL = os.getenv("PGDATABASE_URL") or os.getenv("DATABASE_URL")
+db_url = st.secrets["DATABASE_URL"]
 if not DATABASE_URL:
     raise ValueError("Missing DATABASE_URL or PGDATABASE_URL environment variable")
 if DATABASE_URL.startswith("postgres://"):
