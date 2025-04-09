@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 # Access the database URL from secrets
-db_url = st.secrets["connections"]["DATABASE_URL"]
+db_url = st.secrets["DATABASE_URL"]
 
 # Create a database connection
 engine = sqlalchemy.create_engine(db_url)
